@@ -1,0 +1,6 @@
+*.json
+!model.json
+.prettierrc
+*.py
+Tests/
+node_modules/
