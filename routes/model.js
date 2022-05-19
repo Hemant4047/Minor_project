@@ -12,24 +12,36 @@ const getModel = async () => {
     return m;
 };
 
+const getModel2 = async () => {
+    const m = await tf.loadLayersModel(
+        "file://" + path.join(__dirname, "..", "model2", "model.json") // or D:/Minor_project/model2/model.json
+    );
+    return m;
+};
+
 const model = getModel();
+const model2 = getModel2();
 
 router.get("/model", (req, res, next) => {
-    model.then((m) => {
+    console.log("MODEL:", req.app.locals.model);
+    const chosenModel = req.app.locals.model == 1 ? model : model2;
+    const inputShape = req.app.locals.model == 1 ? [400, 400] : [500, 500];
+    chosenModel.then((m) => {
         fs.readFile(
-            path.join(__dirname, "..", "uploads", "test.jpeg"),
+            path.join(__dirname, "..", "public", "uploads", "test.jpeg"),
             (err, img) => {
                 if (err) res.redirect("/");
-                let tensor = tf.node.decodeJpeg(img, 1); // grayscale, 1 channel
+                let tensor = tf.node.decodeJpeg(img, 3); // grayscale, 1 channel
                 tensor = tf.image
-                    .resizeBilinear(tensor, [320, 320])
+                    .resizeBilinear(tensor, inputShape)
                     .expandDims();
-                //console.log(tensor);
+                // console.log(tensor);
                 const prediction = m
                     .predict(tensor, { batchSize: 24 })
                     .arraySync();
+                res.app.locals.result = prediction[0][0];
                 console.log(prediction);
-                res.redirect("/");
+                res.redirect("/success");
             }
         );
     });
