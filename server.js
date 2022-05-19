@@ -29,6 +29,6 @@ app.use("/", upload.none(), (req, res, next) => {
     res.render("index.ejs", { isUploaded: false, result: -1 });
 });
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
     console.log("Listening at port", PORT);
 });
